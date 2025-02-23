@@ -2,20 +2,19 @@ import streamlit as st
 import requests
 from datetime import datetime
 
-# Configuração da API
-API_URL = "https://public-api.devexpress.com/demo-openai"
-API_USER = "DEMO"
-MODEL = "gpt-4o-mini"
+# Configuração da API do Grok (xAI)
+API_URL = "https://api.x.ai/v1/chat/completions"  # Endpoint hipotético, verifique a documentação oficial
+API_KEY = "xai-CniNRzYHesxo8WdzaVS2ADTHmymokXktCrOymlHEmESN0krZe8dMVucqTdjJKFHIWM7qDuQyA1lzFadY"  # Substitua pela sua chave API do Grok
 
-# Função para obter resposta da API mantendo o contexto
-def get_api_response(messages):
+# Função para obter resposta da API do Grok mantendo o contexto
+def get_grok_response(messages):
     try:
         headers = {
-            "Content-Type": "application/json",
-            "User": API_USER
+            "Authorization": f"Bearer {API_KEY}",
+            "Content-Type": "application/json"
         }
         payload = {
-            "model": MODEL,
+            "model": "grok",  # ou "grok-2" se aplicável, confirme na documentação
             "messages": messages,
             "temperature": 0.7,
             "max_tokens": 1000
@@ -25,7 +24,7 @@ def get_api_response(messages):
         response.raise_for_status()
         return response.json()["choices"][0]["message"]["content"]
     except Exception as e:
-        return f"Erro ao conectar com a API: {str(e)}"
+        return f"Erro ao conectar com a API do Grok: {str(e)}"
 
 # Inicialização do estado da sessão
 if "messages" not in st.session_state:
@@ -36,7 +35,7 @@ if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
 # Configuração da interface
-st.title("Chat de Suporte Técnico - DevExpress")
+st.title("Chat de Suporte Técnico - Grok")
 st.write("Faça sua pergunta abaixo e receba suporte baseado em nossa base de conhecimento.")
 
 # Área de exibição do histórico do chat
@@ -57,9 +56,9 @@ if submit_button and user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
     st.session_state.chat_history.append({"role": "user", "content": user_input})
     
-    # Obtém a resposta da API
+    # Obtém a resposta da API do Grok
     with st.spinner("Gerando resposta..."):
-        response = get_api_response(st.session_state.messages)
+        response = get_grok_response(st.session_state.messages)
     
     # Adiciona a resposta ao contexto e ao histórico
     st.session_state.messages.append({"role": "assistant", "content": response})
