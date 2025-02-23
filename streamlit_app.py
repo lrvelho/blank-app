@@ -3,10 +3,8 @@ import requests
 from datetime import datetime
 
 # Configuração da API do Grok (xAI)
-API_URL = "https://api.x.ai/v1/chat/completions"  # Substitua pelo endpoint real da documentação
-API_KEY = "xai-CniNRzYHesxo8WdzaVS2ADTHmymokXktCrOymlHEmESN0krZe8dMVucqTdjJKFHIWM7qDuQyA1lzFadY"  # Substitua pela sua chave API do Grok
-
-
+API_URL = "https://api.x.ai/v1/chat/completions"
+API_KEY = "xai-CniNRzYHesxo8WdzaVS2ADTHmymokXktCrOymlHEmESN0krZe8dMVucqTdjJKFHIWM7qDuQyA1lzFadY"  # Sua chave API
 
 # Função para obter resposta da API do Grok mantendo o contexto
 def get_grok_response(messages):
@@ -16,7 +14,7 @@ def get_grok_response(messages):
             "Content-Type": "application/json"
         }
         payload = {
-            "model": "grok-2-latest",  # Confirme o nome do modelo na documentação
+            "model": "grok-2-latest",  # Modelo especificado
             "messages": messages,
             "stream": False,
             "temperature": 0,
@@ -32,7 +30,7 @@ def get_grok_response(messages):
 # Inicialização do estado da sessão
 if "messages" not in st.session_state:
     st.session_state.messages = [
-        {"role": "system", "content": "Você é um assistente de suporte técnico útil. Responda às perguntas dos usuários com base no contexto fornecido e mantenha o tom profissional."}
+        {"role": "system", "content": "Você é um assistente de suporte técnico útil. Responda às perguntas dos usuários com base no contexto fornecido e mantenha o tom profissional. Formate suas respostas em Markdown para melhor legibilidade, usando cabeçalhos (#), listas (-), negrito (**), etc., quando apropriado."}
     ]
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
@@ -46,7 +44,12 @@ chat_container = st.container()
 with chat_container:
     for message in st.session_state.chat_history:
         with st.chat_message(message["role"]):
-            st.markdown(f"**{message['role'].capitalize()}**: {message['content']}")
+            if message["role"] == "assistant":
+                # Renderiza a resposta do assistant em Markdown
+                st.markdown(message["content"])
+            else:
+                # Mantém a pergunta do usuário como texto simples com título em negrito
+                st.markdown(f"**{message['role'].capitalize()}**: {message['content']}")
 
 # Formulário de entrada
 with st.form(key="chat_form", clear_on_submit=True):
