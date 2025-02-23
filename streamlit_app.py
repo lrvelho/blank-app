@@ -10,7 +10,7 @@ API_KEY = "xai-CniNRzYHesxo8WdzaVS2ADTHmymokXktCrOymlHEmESN0krZe8dMVucqTdjJKFHIW
 def load_context_file(file_path="Context/context.xlsx"):
     try:
         df = pd.read_excel(file_path)
-        return f"Contexto da planilha ({file_path}):\n{df.to_string(index=False)}"
+        return f"Contexto da planilha ({file_path}): Esta planilha lista a quantidade de prêmios Nobel por país:\n{df.to_string(index=False)}"
     except Exception as e:
         return f"Erro ao carregar a planilha de contexto: {str(e)}"
 
@@ -41,12 +41,14 @@ if "messages" not in st.session_state:
         {
             "role": "system",
             "content": (
-                "Você é um assistente de suporte técnico que responde exclusivamente com base no contexto fornecido pela planilha context.xlsx. "
+                "Você é um assistente de suporte técnico que responde exclusivamente com base no contexto fornecido pela planilha abaixo. "
+                "Esta planilha contém a quantidade de prêmios Nobel por país, com as colunas 'pais' e 'quantidade'. "
                 "Não use conhecimento externo ou outros dados além do conteúdo desta planilha. "
                 "Se a pergunta não puder ser respondida com base nesse contexto, responda exatamente: "
                 "'Não tenho como informar a resposta com base no contexto fornecido.' "
-                "Formate suas respostas em Markdown para melhor legibilidade, usando cabeçalhos (#), listas (-), negrito (**), etc., quando apropriado.\n\n"
-                f"**Contexto Fixo**:\n{context_content}"
+                "Formate suas respostas em Markdown para melhor legibilidade, usando cabeçalhos (#), listas (-), negrito (**), etc., "
+                "quando apropriado.\n\n"
+                f"{context_content}"
             )
         }
     ]
@@ -56,7 +58,7 @@ if "chat_history" not in st.session_state:
 # Configuração da interface
 st.image("Images/LogoLuminaGrande.png", width=200)
 st.title("Chat de Suporte Técnico - Lumina")
-st.write("Faça sua pergunta. As respostas serão baseadas exclusivamente no contexto da planilha fixa.")
+st.write("Faça sua pergunta. As respostas serão baseadas exclusivamente no contexto da planilha fixa sobre prêmios Nobel por país.")
 
 # Área de exibição do histórico do chat
 chat_container = st.container()
