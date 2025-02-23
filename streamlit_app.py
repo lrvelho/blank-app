@@ -3,7 +3,7 @@ import requests
 from datetime import datetime
 
 # Configuração da API do Grok (xAI)
-API_URL = "https://api.x.ai/v1/grok/chat"  # Substitua pelo endpoint real da documentação
+API_URL = "https://api.x.ai/v1/chat/completions"  # Substitua pelo endpoint real da documentação
 API_KEY = "xai-CniNRzYHesxo8WdzaVS2ADTHmymokXktCrOymlHEmESN0krZe8dMVucqTdjJKFHIWM7qDuQyA1lzFadY"  # Substitua pela sua chave API do Grok
 
 # Função para obter resposta da API do Grok mantendo o contexto
