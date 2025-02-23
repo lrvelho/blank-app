@@ -6,11 +6,13 @@ from datetime import datetime
 API_URL = "https://api.x.ai/v1/chat/completions"  # Substitua pelo endpoint real da documentação
 API_KEY = "xai-CniNRzYHesxo8WdzaVS2ADTHmymokXktCrOymlHEmESN0krZe8dMVucqTdjJKFHIWM7qDuQyA1lzFadY"  # Substitua pela sua chave API do Grok
 
+
+
 # Função para obter resposta da API do Grok mantendo o contexto
 def get_grok_response(messages):
     try:
         headers = {
-            "Authorization": f"Bearer {API_KEY}",
+            "Authorization": "Bearer xai-CniNRzYHesxo8WdzaVS2ADTHmymokXktCrOymlHEmESN0krZe8dMVucqTdjJKFHIWM7qDuQyA1lzFadY",
             "Content-Type": "application/json"
         }
         payload = {
