@@ -12,7 +12,7 @@ API_KEY = "xai-CniNRzYHesxo8WdzaVS2ADTHmymokXktCrOymlHEmESN0krZe8dMVucqTdjJKFHIW
 def get_grok_response(messages):
     try:
         headers = {
-            "Authorization": "Bearer xai-CniNRzYHesxo8WdzaVS2ADTHmymokXktCrOymlHEmESN0krZe8dMVucqTdjJKFHIWM7qDuQyA1lzFadY",
+            "Authorization": f"Bearer {API_KEY}",
             "Content-Type": "application/json"
         }
         payload = {
@@ -37,7 +37,7 @@ if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
 # Configuração da interface
-st.title("Chat de Suporte Técnico - Grok")
+st.title("Chat de Suporte Técnico - GrokX")
 st.write("Faça sua pergunta abaixo e receba suporte baseado em nossa base de conhecimento.")
 
 # Área de exibição do histórico do chat
