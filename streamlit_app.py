@@ -101,7 +101,7 @@ if submit_button and (user_input or uploaded_file):
     if user_input:
         user_message += user_input
     
-    # Extrai e adiciona o conteúdo do arquivo, se houver
+    # Extrai e adiciona o conteúdo do arquivo, se houver.
     if uploaded_file:
         file_content = extract_file_content(uploaded_file)
         if file_content:
@@ -123,4 +123,13 @@ if submit_button and (user_input or uploaded_file):
 st.markdown("""
     <style>
     .stTextArea textarea {
-        border-radius:
+        border-radius: 10px;
+        padding: 10px;
+    }
+    .stButton button {
+        background-color: #4CAF50;
+        color: white;
+        border-radius: 5px;
+    }
+    </style>
+""", unsafe_allow_html=True)
