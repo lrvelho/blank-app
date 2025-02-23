@@ -8,7 +8,7 @@ from io import BytesIO
 
 # Configuração da API do Grok (xAI)
 API_URL = "https://api.x.ai/v1/chat/completions"
-API_KEY = "xai-CniNRzYHesxo8WdzaVS2ADTHmymokXktCrOymlHEmESN0krZe8dMVucqTdjJKFHIWM7qDuQyA1lzFadY"  # Sua chave API
+API_KEY = "xai-CniNRzYHesxo8WdzaVS2ADTHmymokXktCrOymlHEmESN0krZe8dMVucqTdjJKFHIWM7qDuQyA1lzFadY"
 
 # Função para extrair texto de arquivos
 def extract_file_content(uploaded_file):
@@ -19,33 +19,32 @@ def extract_file_content(uploaded_file):
     file_name = uploaded_file.name
     
     if file_type == "text/plain":
-        # Arquivos de texto
         return uploaded_file.read().decode("utf-8")
-    
     elif file_type == "application/pdf":
-        # Arquivos PDF
         pdf_reader = PyPDF2.PdfReader(BytesIO(uploaded_file.read()))
         text = ""
         for page in pdf_reader.pages:
             text += page.extract_text() or ""
         return text
-    
     elif file_type in ["image/png", "image/jpeg"]:
-        # Imagens (codifica em base64)
         image_data = uploaded_file.read()
         base64_image = base64.b64encode(image_data).decode("utf-8")
         return f"Imagem ({file_name}) codificada em base64: {base64_image}"
-    
     elif file_type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-        # Arquivos Excel (.xlsx)
         df = pd.read_excel(BytesIO(uploaded_file.read()))
-        # Converte o DataFrame para string em formato de tabela
         return f"Tabela do arquivo ({file_name}):\n{df.to_string(index=False)}"
-    
     else:
         return f"Tipo de arquivo não suportado: {file_type}"
 
-# Função para obter resposta da API do Grok mantendo o contexto
+# Função para carregar a planilha de contexto fixa
+def load_context_file(file_path="Context/context.xlsx"):
+    try:
+        df = pd.read_excel(file_path)
+        return f"Contexto fixo da planilha ({file_path}):\n{df.to_string(index=False)}"
+    except Exception as e:
+        return f"Erro ao carregar a planilha de contexto: {str(e)}"
+
+# Função para obter resposta da API do Grok
 def get_grok_response(messages):
     try:
         headers = {
@@ -59,27 +58,34 @@ def get_grok_response(messages):
             "temperature": 0,
             "max_tokens": 1000
         }
-        
         response = requests.post(API_URL, json=payload, headers=headers)
         response.raise_for_status()
         return response.json()["choices"][0]["message"]["content"]
     except Exception as e:
         return f"Erro ao conectar com a API do Grok: {str(e)}"
 
-# Inicialização do estado da sessão
+# Carrega o contexto fixo ao iniciar e inicializa o estado da sessão
 if "messages" not in st.session_state:
+    context_content = load_context_file("Context/context.xlsx")
     st.session_state.messages = [
-        {"role": "system", "content": "Você é um assistente de suporte técnico útil. Responda às perguntas dos usuários com base no contexto fornecido, incluindo o conteúdo de arquivos anexados (texto, PDFs, imagens ou planilhas Excel). Formate suas respostas em Markdown para melhor legibilidade, usando cabeçalhos (#), listas (-), negrito (**), etc., quando apropriado."}
+        {
+            "role": "system",
+            "content": (
+                "Você é um assistente de suporte técnico útil. Responda às perguntas dos usuários "
+                f"com base no contexto fixo abaixo e no conteúdo de arquivos anexados (texto, PDFs, imagens ou planilhas Excel), se houver. "
+                "Formate suas respostas em Markdown para melhor legibilidade, usando cabeçalhos (#), listas (-), negrito (**), etc., "
+                "quando apropriado.\n\n"
+                f"**Contexto Fixo**:\n{context_content}"
+            )
+        }
     ]
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
 # Configuração da interface
-st.image( "Images/LogoLuminaGrande.png", width=200)  # Substitua pelo caminho do seu logo
+st.image("Images/LogoLuminaGrande.png", width=200)
 st.title("Chat de Suporte Técnico - Lumina")
-st.write("Faça sua pergunta e anexe arquivos (texto, PDF, imagens ou Excel) para análise.")
-
-
+st.write("Faça sua pergunta e anexe arquivos (texto, PDF, imagens ou Excel) para análise. As respostas serão baseadas no contexto fixo e em anexos, se fornecidos.")
 
 # Área de exibição do histórico do chat
 chat_container = st.container()
@@ -99,12 +105,10 @@ with st.form(key="chat_form", clear_on_submit=True):
 
 # Processamento da entrada do usuário
 if submit_button and (user_input or uploaded_file):
-    # Constrói a mensagem do usuário
     user_message = ""
     if user_input:
         user_message += user_input
     
-    # Extrai e adiciona o conteúdo do arquivo, se houver.
     if uploaded_file:
         file_content = extract_file_content(uploaded_file)
         if file_content:
