@@ -10,7 +10,12 @@ API_KEY = "xai-CniNRzYHesxo8WdzaVS2ADTHmymokXktCrOymlHEmESN0krZe8dMVucqTdjJKFHIW
 def load_context_file(file_path="Context/context.xlsx"):
     try:
         df = pd.read_excel(file_path)
-        return f"Contexto da planilha ({file_path}): Esta planilha lista a quantidade de prêmios Nobel por país:\n{df.to_string(index=False)}"
+        # Normaliza os nomes das colunas para garantir consistência (sem espaços extras, letras minúsculas)
+        df.columns = [col.strip().lower() for col in df.columns]
+        # Verifica se as colunas esperadas existem
+        if 'pais' not in df.columns or 'quantidade' not in df.columns:
+            raise ValueError("A planilha deve conter as colunas 'pais' e 'quantidade'")
+        return f"Contexto da planilha ({file_path}): Esta planilha lista a quantidade de prêmios Nobel por país, com as colunas 'pais' e 'quantidade':\n{df.to_string(index=False)}"
     except Exception as e:
         return f"Erro ao carregar a planilha de contexto: {str(e)}"
 
@@ -25,7 +30,7 @@ def get_grok_response(messages):
             "model": "grok-2-latest",
             "messages": messages,
             "stream": False,
-            "temperature": 0,
+            "temperature": 0,  # Temperatura baixa para respostas mais consistentes
             "max_tokens": 1000
         }
         response = requests.post(API_URL, json=payload, headers=headers)
@@ -42,10 +47,11 @@ if "messages" not in st.session_state:
             "role": "system",
             "content": (
                 "Você é um assistente de suporte técnico que responde exclusivamente com base no contexto fornecido pela planilha abaixo. "
-                "Esta planilha contém a quantidade de prêmios Nobel por país, com as colunas 'Nome do Pais' e 'Prêmios Nobel'. "
+                "Esta planilha contém a quantidade de prêmios Nobel por país, com as colunas 'pais' e 'quantidade', onde 'pais' é o nome do país e 'quantidade' é o número total de prêmios Nobel recebidos por aquele país. "
+                "Responda perguntas como 'Quantos Nobel tem [país]?' ou 'Qual a quantidade de prêmios Nobel de [país]?' usando apenas os dados desta planilha. "
                 "Não use conhecimento externo ou outros dados além do conteúdo desta planilha. "
-                "Se a pergunta não puder ser respondida com base nesse contexto, responda exatamente: "
-                "'Não tenho como informar a resposta com base no contexto fornecido.' "
+                "Se a pergunta não puder ser respondida com base nesse contexto (por exemplo, se o país não estiver listado ou se a pergunta não se relacionar com prêmios Nobel), "
+                "responda exatamente: 'Não tenho como informar a resposta com base no contexto fornecido.' "
                 "Formate suas respostas em Markdown para melhor legibilidade, usando cabeçalhos (#), listas (-), negrito (**), etc., "
                 "quando apropriado.\n\n"
                 f"{context_content}"
