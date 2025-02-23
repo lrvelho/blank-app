@@ -8,20 +8,7 @@ API_URL = "https://api.x.ai/v1/chat/completions"
 API_KEY = "xai-CniNRzYHesxo8WdzaVS2ADTHmymokXktCrOymlHEmESN0krZe8dMVucqTdjJKFHIWM7qDuQyA1lzFadY"
 
 
-'''
-# Função para carregar a planilha de contexto fixa
-def load_context_file(file_path="Context/context.xlsx"):
-    try:
-        df = pd.read_excel(file_path)
-        # Normaliza os nomes das colunas para garantir consistência (sem espaços extras, letras minúsculas)
-        df.columns = [col.strip().lower() for col in df.columns]
-        # Verifica se as colunas esperadas existem
-        if 'pais' not in df.columns or 'quantidade' not in df.columns:
-            raise ValueError("A planilha deve conter as colunas 'pais' e 'quantidade'")
-        return f"Contexto da planilha ({file_path}): Esta planilha lista a quantidade de prêmios Nobel por país, com as colunas 'pais' e 'quantidade':\n{df.to_string(index=False)}"
-    except Exception as e:
-        return f"Erro ao carregar a planilha de contexto: {str(e)}"
-'''
+
 
 # Função para carregar o contexto a partir de um arquivo JSON
 def load_context_file(file_path="Context/context.json"):
