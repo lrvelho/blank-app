@@ -41,7 +41,7 @@ if "messages" not in st.session_state:
         {
             "role": "system",
             "content": (
-                "Você é um assistente de suporte técnico que responde exclusivamente com base no contexto fornecido pela planilha abaixo. "
+                "Você é um assistente de suporte técnico que responde exclusivamente com base no contexto fornecido pela planilha context.xlsx. "
                 "Não use conhecimento externo ou outros dados além do conteúdo desta planilha. "
                 "Se a pergunta não puder ser respondida com base nesse contexto, responda exatamente: "
                 "'Não tenho como informar a resposta com base no contexto fornecido.' "
