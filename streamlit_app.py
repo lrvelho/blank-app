@@ -56,7 +56,7 @@ def get_grok_response(messages):
 
 # Carrega o contexto fixo ao iniciar e inicializa o estado da sessão
 if "messages" not in st.session_state:
-    context_content = load_context_file("Context/context.xlsx")
+    context_content = load_context_file("Context/context.json")
     st.session_state.messages = [
         {
             "role": "system",
