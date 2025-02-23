@@ -75,6 +75,7 @@ if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
 # Configuração da interface
+st.image( "Images/LogoLuminaGrande.png", width=100)  # Substitua pelo caminho do seu logo
 st.title("Chat de Suporte Técnico - Lumina")
 st.write("Faça sua pergunta e anexe arquivos (texto, PDF, imagens ou Excel) para análise.")
 
