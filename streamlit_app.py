@@ -3,7 +3,7 @@ import requests
 from datetime import datetime
 
 # Configuração da API do Grok (xAI)
-API_URL = "https://api.x.ai/v1/chat/completions"  # Endpoint hipotético, verifique a documentação oficial
+API_URL = "https://api.x.ai/v1/grok/chat"  # Substitua pelo endpoint real da documentação
 API_KEY = "xai-CniNRzYHesxo8WdzaVS2ADTHmymokXktCrOymlHEmESN0krZe8dMVucqTdjJKFHIWM7qDuQyA1lzFadY"  # Substitua pela sua chave API do Grok
 
 # Função para obter resposta da API do Grok mantendo o contexto
@@ -14,7 +14,7 @@ def get_grok_response(messages):
             "Content-Type": "application/json"
         }
         payload = {
-            "model": "grok",  # ou "grok-2" se aplicável, confirme na documentação
+            "model": "grok",  # Confirme o nome do modelo na documentação
             "messages": messages,
             "temperature": 0.7,
             "max_tokens": 1000
@@ -52,19 +52,15 @@ with st.form(key="chat_form", clear_on_submit=True):
 
 # Processamento da entrada do usuário
 if submit_button and user_input:
-    # Adiciona a mensagem do usuário ao contexto
     st.session_state.messages.append({"role": "user", "content": user_input})
     st.session_state.chat_history.append({"role": "user", "content": user_input})
     
-    # Obtém a resposta da API do Grok
     with st.spinner("Gerando resposta..."):
         response = get_grok_response(st.session_state.messages)
     
-    # Adiciona a resposta ao contexto e ao histórico
     st.session_state.messages.append({"role": "assistant", "content": response})
     st.session_state.chat_history.append({"role": "assistant", "content": response})
     
-    # Força a atualização da página
     st.rerun()
 
 # Estilização adicional
