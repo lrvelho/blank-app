@@ -3,6 +3,7 @@ import requests
 import base64
 from datetime import datetime
 import PyPDF2  # Para ler PDFs
+import pandas as pd  # Para ler Excel
 from io import BytesIO
 
 # Configuração da API do Grok (xAI)
@@ -30,10 +31,16 @@ def extract_file_content(uploaded_file):
         return text
     
     elif file_type in ["image/png", "image/jpeg"]:
-        # Imagens (codifica em base64 para enviar ao Grok)
+        # Imagens (codifica em base64)
         image_data = uploaded_file.read()
         base64_image = base64.b64encode(image_data).decode("utf-8")
         return f"Imagem ({file_name}) codificada em base64: {base64_image}"
+    
+    elif file_type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+        # Arquivos Excel (.xlsx)
+        df = pd.read_excel(BytesIO(uploaded_file.read()))
+        # Converte o DataFrame para string em formato de tabela
+        return f"Tabela do arquivo ({file_name}):\n{df.to_string(index=False)}"
     
     else:
         return f"Tipo de arquivo não suportado: {file_type}"
@@ -62,14 +69,14 @@ def get_grok_response(messages):
 # Inicialização do estado da sessão
 if "messages" not in st.session_state:
     st.session_state.messages = [
-        {"role": "system", "content": "Você é um assistente de suporte técnico útil. Responda às perguntas dos usuários com base no contexto fornecido, incluindo o conteúdo de arquivos anexados (texto, PDFs ou imagens). Formate suas respostas em Markdown para melhor legibilidade, usando cabeçalhos (#), listas (-), negrito (**), etc., quando apropriado."}
+        {"role": "system", "content": "Você é um assistente de suporte técnico útil. Responda às perguntas dos usuários com base no contexto fornecido, incluindo o conteúdo de arquivos anexados (texto, PDFs, imagens ou planilhas Excel). Formate suas respostas em Markdown para melhor legibilidade, usando cabeçalhos (#), listas (-), negrito (**), etc., quando apropriado."}
     ]
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
 # Configuração da interface
 st.title("Chat de Suporte Técnico - GrokX")
-st.write("Faça sua pergunta e anexe arquivos (texto, PDF ou imagens) para análise.")
+st.write("Faça sua pergunta e anexe arquivos (texto, PDF, imagens ou Excel) para análise.")
 
 # Área de exibição do histórico do chat
 chat_container = st.container()
@@ -84,7 +91,7 @@ with chat_container:
 # Formulário de entrada com upload de arquivo
 with st.form(key="chat_form", clear_on_submit=True):
     user_input = st.text_area("Digite sua pergunta aqui:", height=100)
-    uploaded_file = st.file_uploader("Anexe um arquivo (opcional):", type=["txt", "pdf", "png", "jpg", "jpeg"])
+    uploaded_file = st.file_uploader("Anexe um arquivo (opcional):", type=["txt", "pdf", "png", "jpg", "jpeg", "xlsx"])
     submit_button = st.form_submit_button(label="Enviar")
 
 # Processamento da entrada do usuário
@@ -116,13 +123,4 @@ if submit_button and (user_input or uploaded_file):
 st.markdown("""
     <style>
     .stTextArea textarea {
-        border-radius: 10px;
-        padding: 10px;
-    }
-    .stButton button {
-        background-color: #4CAF50;
-        color: white;
-        border-radius: 5px;
-    }
-    </style>
-""", unsafe_allow_html=True)
+        border-radius:
