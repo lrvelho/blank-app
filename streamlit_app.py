@@ -1,10 +1,42 @@
 import streamlit as st
 import requests
+import base64
 from datetime import datetime
+import PyPDF2  # Para ler PDFs
+from io import BytesIO
 
 # Configuração da API do Grok (xAI)
 API_URL = "https://api.x.ai/v1/chat/completions"
 API_KEY = "xai-CniNRzYHesxo8WdzaVS2ADTHmymokXktCrOymlHEmESN0krZe8dMVucqTdjJKFHIWM7qDuQyA1lzFadY"  # Sua chave API
+
+# Função para extrair texto de arquivos
+def extract_file_content(uploaded_file):
+    if uploaded_file is None:
+        return None
+    
+    file_type = uploaded_file.type
+    file_name = uploaded_file.name
+    
+    if file_type == "text/plain":
+        # Arquivos de texto
+        return uploaded_file.read().decode("utf-8")
+    
+    elif file_type == "application/pdf":
+        # Arquivos PDF
+        pdf_reader = PyPDF2.PdfReader(BytesIO(uploaded_file.read()))
+        text = ""
+        for page in pdf_reader.pages:
+            text += page.extract_text() or ""
+        return text
+    
+    elif file_type in ["image/png", "image/jpeg"]:
+        # Imagens (codifica em base64 para enviar ao Grok)
+        image_data = uploaded_file.read()
+        base64_image = base64.b64encode(image_data).decode("utf-8")
+        return f"Imagem ({file_name}) codificada em base64: {base64_image}"
+    
+    else:
+        return f"Tipo de arquivo não suportado: {file_type}"
 
 # Função para obter resposta da API do Grok mantendo o contexto
 def get_grok_response(messages):
@@ -14,7 +46,7 @@ def get_grok_response(messages):
             "Content-Type": "application/json"
         }
         payload = {
-            "model": "grok-2-latest",  # Modelo especificado
+            "model": "grok-2-latest",
             "messages": messages,
             "stream": False,
             "temperature": 0,
@@ -30,14 +62,14 @@ def get_grok_response(messages):
 # Inicialização do estado da sessão
 if "messages" not in st.session_state:
     st.session_state.messages = [
-        {"role": "system", "content": "Você é um assistente de suporte técnico útil. Responda às perguntas dos usuários com base no contexto fornecido e mantenha o tom profissional. Formate suas respostas em Markdown para melhor legibilidade, usando cabeçalhos (#), listas (-), negrito (**), etc., quando apropriado."}
+        {"role": "system", "content": "Você é um assistente de suporte técnico útil. Responda às perguntas dos usuários com base no contexto fornecido, incluindo o conteúdo de arquivos anexados (texto, PDFs ou imagens). Formate suas respostas em Markdown para melhor legibilidade, usando cabeçalhos (#), listas (-), negrito (**), etc., quando apropriado."}
     ]
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
 # Configuração da interface
 st.title("Chat de Suporte Técnico - GrokX")
-st.write("Faça sua pergunta abaixo e receba suporte baseado em nossa base de conhecimento.")
+st.write("Faça sua pergunta e anexe arquivos (texto, PDF ou imagens) para análise.")
 
 # Área de exibição do histórico do chat
 chat_container = st.container()
@@ -45,29 +77,40 @@ with chat_container:
     for message in st.session_state.chat_history:
         with st.chat_message(message["role"]):
             if message["role"] == "assistant":
-                # Renderiza a resposta do assistant em Markdown
                 st.markdown(message["content"])
             else:
-                # Mantém a pergunta do usuário como texto simples com título em negrito
                 st.markdown(f"**{message['role'].capitalize()}**: {message['content']}")
 
-# Formulário de entrada
+# Formulário de entrada com upload de arquivo
 with st.form(key="chat_form", clear_on_submit=True):
     user_input = st.text_area("Digite sua pergunta aqui:", height=100)
+    uploaded_file = st.file_uploader("Anexe um arquivo (opcional):", type=["txt", "pdf", "png", "jpg", "jpeg"])
     submit_button = st.form_submit_button(label="Enviar")
 
 # Processamento da entrada do usuário
-if submit_button and user_input:
-    st.session_state.messages.append({"role": "user", "content": user_input})
-    st.session_state.chat_history.append({"role": "user", "content": user_input})
+if submit_button and (user_input or uploaded_file):
+    # Constrói a mensagem do usuário
+    user_message = ""
+    if user_input:
+        user_message += user_input
     
-    with st.spinner("Gerando resposta..."):
-        response = get_grok_response(st.session_state.messages)
+    # Extrai e adiciona o conteúdo do arquivo, se houver
+    if uploaded_file:
+        file_content = extract_file_content(uploaded_file)
+        if file_content:
+            user_message += f"\n\n**Conteúdo do arquivo ({uploaded_file.name})**:\n{file_content}"
     
-    st.session_state.messages.append({"role": "assistant", "content": response})
-    st.session_state.chat_history.append({"role": "assistant", "content": response})
-    
-    st.rerun()
+    if user_message:
+        st.session_state.messages.append({"role": "user", "content": user_message})
+        st.session_state.chat_history.append({"role": "user", "content": user_message})
+        
+        with st.spinner("Gerando resposta..."):
+            response = get_grok_response(st.session_state.messages)
+        
+        st.session_state.messages.append({"role": "assistant", "content": response})
+        st.session_state.chat_history.append({"role": "assistant", "content": response})
+        
+        st.rerun()
 
 # Estilização adicional
 st.markdown("""
