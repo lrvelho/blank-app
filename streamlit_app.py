@@ -1,11 +1,14 @@
 import streamlit as st
 import requests
 import pandas as pd
+import json
 
 # Configuração da API do Grok (xAI)
 API_URL = "https://api.x.ai/v1/chat/completions"
 API_KEY = "xai-CniNRzYHesxo8WdzaVS2ADTHmymokXktCrOymlHEmESN0krZe8dMVucqTdjJKFHIWM7qDuQyA1lzFadY"
 
+
+'''
 # Função para carregar a planilha de contexto fixa
 def load_context_file(file_path="Context/context.xlsx"):
     try:
@@ -18,6 +21,31 @@ def load_context_file(file_path="Context/context.xlsx"):
         return f"Contexto da planilha ({file_path}): Esta planilha lista a quantidade de prêmios Nobel por país, com as colunas 'pais' e 'quantidade':\n{df.to_string(index=False)}"
     except Exception as e:
         return f"Erro ao carregar a planilha de contexto: {str(e)}"
+'''
+
+# Função para carregar o contexto a partir de um arquivo JSON
+def load_context_file(file_path="Context/context.json"):
+    try:
+        with open(file_path, "r", encoding="utf-8") as file:
+            data = json.load(file)
+
+        # Certifica-se de que o JSON contém a estrutura esperada
+        if not isinstance(data, list):
+            raise ValueError("O arquivo JSON deve ser uma lista de objetos com as chaves 'pais' e 'quantidade'.")
+
+        for item in data:
+            if "pais" not in item or "quantidade" not in item:
+                raise ValueError("Cada entrada do JSON deve conter as chaves 'pais' e 'quantidade'.")
+
+        # Converte para DataFrame para formatação similar à do Excel
+        df = pd.DataFrame(data)
+        df.columns = [col.strip().lower() for col in df.columns]  # Normaliza os nomes das colunas
+
+        return f"Contexto do arquivo JSON ({file_path}):\n{df.to_string(index=False)}"
+
+    except Exception as e:
+        return f"Erro ao carregar o arquivo de contexto: {str(e)}"
+    
 
 # Função para obter resposta da API do Grok
 def get_grok_response(messages):
@@ -46,10 +74,10 @@ if "messages" not in st.session_state:
         {
             "role": "system",
             "content": (
-                "Você é um assistente de suporte técnico que responde exclusivamente com base no contexto fornecido pela planilha abaixo. "
-                "Esta planilha contém a quantidade de prêmios Nobel por país, com as colunas 'pais' e 'quantidade', onde 'pais' é o nome do país e 'quantidade' é o número total de prêmios Nobel recebidos por aquele país. "
-                "Responda perguntas como 'Quantos Nobel tem [país]?' ou 'Qual a quantidade de prêmios Nobel de [país]?' usando apenas os dados desta planilha. "
-                "Não use conhecimento externo ou outros dados além do conteúdo desta planilha. "
+                "Você é um assistente de suporte técnico que responde exclusivamente com base no contexto fornecido pelo arquivo context.json. "
+                "Este arquivo contém a quantidade de prêmios Nobel por país, com as colunas 'pais' e 'quantidade', onde 'pais' é o nome do país e 'quantidade' é o número total de prêmios Nobel recebidos por aquele país. "
+                "Responda perguntas como 'Quantos Nobel tem [país]?' ou 'Qual a quantidade de prêmios Nobel de [país]?' usando apenas os dados deste arquivo. "
+                "Não use conhecimento externo ou outros dados além do conteúdo deste arquivo. "
                 "Se a pergunta não puder ser respondida com base nesse contexto (por exemplo, se o país não estiver listado ou se a pergunta não se relacionar com prêmios Nobel), "
                 "responda exatamente: 'Não tenho como informar a resposta com base no contexto fornecido.' "
                 "Formate suas respostas em Markdown para melhor legibilidade, usando cabeçalhos (#), listas (-), negrito (**), etc., "
