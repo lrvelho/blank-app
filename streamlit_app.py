@@ -82,7 +82,7 @@ st.write("Faça sua pergunta e anexe arquivos (texto, PDF, imagens ou Excel) par
 # Configuração da interface
 col1, col2 = st.columns([1, 3])  # Ajuste as proporções conforme necessário
 with col1:
-    st.image( "Images\LogoLuminaGrande.png", width=100)  # Substitua pelo caminho do seu logo
+    st.image( "Images/LogoLuminaGrande.png", width=100)  # Substitua pelo caminho do seu logo
 with col2:
     st.title("Chat de Suporte Técnico - Lumina")
 
