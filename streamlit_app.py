@@ -16,9 +16,10 @@ def get_grok_response(messages):
             "Content-Type": "application/json"
         }
         payload = {
-            "model": "grok",  # Confirme o nome do modelo na documentação
+            "model": "grok-2-latest",  # Confirme o nome do modelo na documentação
             "messages": messages,
-            "temperature": 0.7,
+            "stream": False,
+            "temperature": 0,
             "max_tokens": 1000
         }
         
