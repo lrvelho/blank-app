@@ -78,7 +78,7 @@ if "chat_history" not in st.session_state:
 
 # Configuração da interface
 st.image("Images/LogoLuminaGrande.png", width=200)
-st.title("Chat de Suporte Técnico - Lumina")
+st.title("Chat de Suporte Técnico - Lumina IT")
 st.write("Faça sua pergunta. As respostas serão baseadas exclusivamente no contexto da planilha fixa sobre prêmios Nobel por país.")
 
 # Área de exibição do histórico do chat
