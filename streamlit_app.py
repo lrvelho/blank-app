@@ -4,10 +4,12 @@ import pandas as pd
 import json
 
 # Configuração da API do Grok (xAI)
-API_URL = "https://api.x.ai/v1/chat/completions"
-API_KEY = "xai-CniNRzYHesxo8WdzaVS2ADTHmymokXktCrOymlHEmESN0krZe8dMVucqTdjJKFHIWM7qDuQyA1lzFadY"
+#API_URL = "https://api.x.ai/v1/chat/completions"
+#API_KEY = "xai-CniNRzYHesxo8WdzaVS2ADTHmymokXktCrOymlHEmESN0krZe8dMVucqTdjJKFHIWM7qDuQyA1lzFadY"
+#"model": "grok-2-latest",
 
-
+API_URL = "https://api.groq.com/openai/v1/chat/completions"
+API_KEY = "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"
 
 
 # Função para carregar o contexto a partir de um arquivo JSON
@@ -42,7 +44,7 @@ def get_grok_response(messages):
             "Content-Type": "application/json"
         }
         payload = {
-            "model": "grok-2-latest",
+            "model": "llama3-8b-8192",
             "messages": messages,
             "stream": False,
             "temperature": 0,  # Temperatura baixa para respostas mais consistentes
@@ -78,7 +80,7 @@ if "chat_history" not in st.session_state:
 
 # Configuração da interface
 st.image("Images/LogoLuminaGrande.png", width=200)
-st.title("Chat de Suporte Técnico - Lumina IT")
+st.title("Chat de Suporte Técnico - Lumina IT 2025")
 st.write("Faça sua pergunta. As respostas serão baseadas exclusivamente no contexto da planilha fixa sobre prêmios Nobel por país.")
 
 # Área de exibição do histórico do chat
